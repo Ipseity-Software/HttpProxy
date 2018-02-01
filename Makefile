@@ -1,13 +1,13 @@
 OBJDIR = obj
 BINDIR = bin
-FLAGS = 
+FLAGS =
 OFLAGS = -c
 DBGFLAGS = -g
 INCLUDES = `pwd`
-LIBS = -pthread
+LIBS = -pthread -ldl
 CC = gcc
 RMFLAGS = -f
-items = util main db
+items = util main db plugin
 
 test = main_dbg.o db_dbg.o
 
