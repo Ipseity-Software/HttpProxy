@@ -17,6 +17,7 @@
 /* project libs */
 #include <util.h>
 #include <db.h>
+#include <plugin.h>
 
 #define BUFSIZE 4096
 
@@ -153,20 +154,15 @@ char *determine_request(char *buffer, ssize_t len)
 	ip = NULL;
 	host = find_host(buffer, len);
 	printf("Debug: %s\n", host);
-	if (strstr(host, "add.") != NULL) // starts with addhost directive
-	{
-		printf("Host has add. in it\n");
-		addname = malloc(768);
-		addip = malloc(32);
-		sscanf(host, "add.%[^_]_%d.%d.%d.%d.ipseitysoftware.com", addname, &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
-		sprintf(addip, "%u.%u.%u.%u", tmp[0], tmp[1], tmp[2], tmp[3]);
-		printf("Adding %s -> %s\n", addname, addip);
-		hosts = addHost(hosts, addname, addip);
-		return strdup(addip);
-	}
 	for (ptr = hosts; ptr != NULL && strcmp(ptr->hostname, host); ptr = ptr->next);
 	if (ptr)
 		ip = strdup(ptr->ip);
+	if (ip == NULL) // couldn't resolve it locally
+	{
+		printf("\tResolving by plugins\n");
+		ip = resolve_plugin(host);
+	}
+	printf("\tIP: %s\n", ip);
 	return ip;
 }
 
@@ -276,7 +272,8 @@ int main(int argc, char ** argv)
 	listenfd = 0;
 	connfd = 0;
 	threads = NULL;
-	hosts = addHost(hosts, "www.ipseitysoftware.com", "10.1.0.19");
+//	hosts = addHost(hosts, "www.ipseitysoftware.com", "10.1.0.19");
+	hosts = addHost(hosts, "test1.fake", "1.1.1.1");
 	/* */
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	memset(&serv_addr, '0', sizeof(serv_addr));
